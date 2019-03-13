@@ -4,9 +4,9 @@ pipeline {
         stage('Build'){
             steps {
                 //sh 'which mvn'
-                sh 'whoami; echo $PATH'
-                sh 'echo $PATH'
-                sh 'mvn clean package'
+                //sh 'whoami; echo $PATH'
+                //sh 'echo $PATH'
+                sh '/usr/local/apache-maven/bin/mvn clean package'
             }
             post {
                 success {
