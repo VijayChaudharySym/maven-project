@@ -3,6 +3,9 @@ pipeline {
     stages{
         stage('Build'){
             steps {
+                sh 'which mvn'
+                sh 'whoami'
+                sh 'echo $PATH'
                 sh 'mvn clean package'
             }
             post {
