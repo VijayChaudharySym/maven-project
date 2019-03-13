@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'awx' }
+    agent { label 'awx_rs1' }
     stages{
         stage('Build'){
             steps {
