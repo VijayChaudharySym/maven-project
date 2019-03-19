@@ -1,17 +1,40 @@
 pipeline {
-    agent { label 'awx' }
-    stages{
+    agent any
+
+    parameters {
+         string(name: 'tomcat_dev', defaultValue: '10.149.164.180', description: 'Staging Server')
+         string(name: 'tomcat_prod', defaultValue: '10.149.231.182', description: 'Production Server')
+    }
+
+    triggers {
+         pollSCM('* * * * *')
+     }
+
+stages{
         stage('Build'){
             steps {
-                //sh 'which mvn'
-                //sh 'whoami; echo $PATH'
-                //sh 'echo $PATH'
-                sh '/usr/local/apache-maven/bin/mvn clean package'
+                sh 'mvn clean package'
             }
             post {
                 success {
-                    echo 'Now docking...'
-                    sh "sudo docker build . -t tomcatwebapp:${env.BUILD_ID}"
+                    echo 'Now Archiving...'
+                    archiveArtifacts artifacts: '**/target/*.war'
+                }
+            }
+        }
+
+        stage ('Deployments'){
+            parallel{
+                stage ('Deploy to Staging'){
+                    steps {
+                        //sh "scp -i /home/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_dev}:/var/lib/tomcat7/webapps"
+                    }
+                }
+
+                stage ("Deploy to Production"){
+                    steps {
+                        //sh "scp -i /home/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_prod}:/var/lib/tomcat7/webapps"
+                    }
                 }
             }
         }
