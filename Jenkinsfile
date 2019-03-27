@@ -1,16 +1,10 @@
 pipeline {
-    agent any
-
-    parameters {
-         string(name: 'tomcat_dev', defaultValue: '10.149.164.180', description: 'Staging Server')
-         string(name: 'tomcat_prod', defaultValue: '10.149.231.182', description: 'Production Server')
-    }
-
-    triggers {
-         pollSCM('* * * * *')
-     }
-
-stages{
+agent {
+        docker {
+            image 'maven:3-alpine'
+			label 'awx'
+        }
+    }    stages{
         stage('Build'){
             steps {
                 sh 'mvn clean package'
@@ -19,25 +13,6 @@ stages{
                 success {
                     echo 'Now Archiving...'
                     archiveArtifacts artifacts: '**/target/*.war'
-                }
-            }
-        }
-
-        stage ('Deployments'){
-            parallel{
-                stage ('Deploy to Staging'){
-                    steps {
-                        echo 'staging...'
-                        //sh "scp -i /home/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_dev}:/var/lib/tomcat7/webapps"
-                    }
-                }
-
-                stage ("Deploy to Production"){
-                    steps {
-                        echo 'prod...'
-                        //sh "scp -i /home/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_prod}:/var/lib/tomcat7/webapps"
-                        sh "scp -i /home/ansible/.ssh/id_rsa **/target/*.war ansible@${params.tomcat_prod}:/opt/tomcat/webapps"
-                    }
                 }
             }
         }
